@@ -1,65 +1,77 @@
 import Image from "next/image";
+import CountdownTimer from "@/components/CountdownTimer";
+import EmailForm from "@/components/EmailForm";
+import SocialProof from "@/components/SocialProof";
+import SiteFooter from "@/components/SiteFooter";
+
+/* ============================================================
+   Page d'accueil — Coming Soon ESCEN
+   Academic Minimalism + Digital Premium
+   Architecture : logo → badge → titre → timer → social proof
+                  → formulaire email → footer
+   ============================================================ */
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="relative z-10 flex flex-col flex-1">
+      <main className="flex-1 flex flex-col items-center justify-between w-full max-w-[1120px] mx-auto px-5 py-16 md:py-24 lg:py-28">
+        {/* ============================================
+           HEADER — Logo
+           ============================================ */}
+        <header className="w-full flex justify-center pt-6 md:pt-8 lg:pt-10">
+          <Image
+            src="/LOGO_ESCEN_WEB.png"
+            alt="ESCEN — École Supérieure de Commerce et d'Économie Numérique"
+            width={280}
+            height={100}
+            priority
+            className="w-[200px] md:w-[280px] h-auto select-none"
+          />
+        </header>
+
+        {/* ============================================
+           HERO — Badge + Titre + Timer + Social Proof + Email
+           ============================================ */}
+        <section
+          className="w-full flex flex-col items-center text-center gap-10 md:gap-14 py-10 md:py-14 lg:py-16"
+          aria-labelledby="hero-title"
+        >
+          {/* Badge "Bientôt disponible" */}
+          <span
+            className="inline-block text-[0.6875rem] font-medium uppercase tracking-[0.18em] text-escen-cyan bg-escen-surface border border-escen-border rounded-full px-4 py-1"
+          >
+            Bientôt disponible
+          </span>
+
+          {/* Titre principal */}
+          <h1
+            id="hero-title"
+            className="text-[clamp(1.75rem,4vw,2.75rem)] font-semibold tracking-tight leading-[1.15] text-escen-navy max-w-[720px] mx-auto"
+          >
+            ESCEN prépare une nouvelle solution
+            <br className="hidden sm:block" /> numérique de confiance
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+          {/* Compte à rebours */}
+          <div className="w-full flex justify-center">
+            <CountdownTimer />
+          </div>
+
+          {/* Social Proof — centrée sur la rétention humaine */}
+          <SocialProof />
+
+          {/* Formulaire de notification */}
+          <EmailForm />
+        </section>
+
+        {/* Spacer pour équilibrer le footer */}
+        <div aria-hidden="true" className="h-4" />
       </main>
+
+      {/* ============================================
+         FOOTER
+         ============================================ */}
+      <SiteFooter />
     </div>
   );
 }
