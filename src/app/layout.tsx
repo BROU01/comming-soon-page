@@ -43,33 +43,23 @@ export const metadata: Metadata = {
     "solution numérique",
     "éducation",
     "enseignement supérieur",
-  ],
+  ],    /* --- Open Graph --- */
+    openGraph: {
+      type: "website",
+      locale: "fr_FR",
+      siteName: siteName,
+      title: title,
+      description: description,
+      url: siteUrl,
+      // TODO: Remplacer par une vraie image PNG 1200x630 au lancement
+    },
 
-  /* --- Open Graph --- */
-  openGraph: {
-    type: "website",
-    locale: "fr_FR",
-    siteName: siteName,
-    title: title,
-    description: description,
-    url: siteUrl,
-    images: [
-      {
-        url: "/og-image.svg",
-        width: 1200,
-        height: 630,
-        alt: "ESCEN — Nouvelle solution numérique à venir",
-      },
-    ],
-  },
-
-  /* --- Twitter Card --- */
-  twitter: {
-    card: "summary_large_image",
-    title: title,
-    description: description,
-    images: ["/og-image.svg"],
-  },
+    /* --- Twitter Card --- */
+    twitter: {
+      card: "summary",
+      title: title,
+      description: description,
+    },
 
   /* --- Icons --- */
   icons: {

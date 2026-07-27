@@ -1,0 +1,9 @@
+feat: page coming soon ESCEN avec timer 2 mois et notification
+
+- Design system Academic Minimalism + Digital Premium
+- Countdown timer 60 jours avec persistence localStorage
+- Social proof centree retention humaine (deep cognitive marketing)
+- Formulaire notification email avec validation accessible
+- SEO complet: OG, Twitter Cards, JSON-LD, robots, sitemap
+- Accessibilite: aria-live, sr-only, prefers-reduced-motion
+- Components: CountdownTimer, EmailForm, SocialProof, SiteFooter
