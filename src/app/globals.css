@@ -61,7 +61,7 @@
 
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50% { opacity: 0.3; }
 }
 
 @keyframes digit-pop {
@@ -94,18 +94,14 @@ body::before {
   z-index: 0;
 }
 
-/* ============================================================
-   Focus ring — consistent across the app
-   ============================================================ */
+/* Focus ring */
 :focus-visible {
   outline: 2px solid var(--color-escen-cyan);
   outline-offset: 3px;
   border-radius: 6px;
 }
 
-/* ============================================================
-   Reduced motion — respect user preference
-   ============================================================ */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -117,9 +113,80 @@ body::before {
   }
 }
 
-/* ============================================================
-   Font-face smoothing for Inter
-   ============================================================ */
+/* Font-face smoothing */
 @supports (font-variation-settings: normal) {
   :root { font-family: "InterVariable", sans-serif; }
+}
+
+/* ============================================================
+   iPhone / iOS Calendar Minuteur Clock — Original ESCEN Design
+   (White background cards, Cyan digits, Navy labels)
+   ============================================================ */
+
+/* --- Each digit slot --- */
+.digit-slot {
+  position: relative;
+  width: 1.75rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .digit-slot {
+    width: 2.5rem;
+    height: 4.25rem;
+  }
+}
+
+/* --- Number inside slot --- */
+.number {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+  font-weight: 700;
+  color: var(--color-escen-cyan);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  will-change: transform, opacity;
+}
+
+/* --- iPhone / iOS Calendar Slide-Up Vertical Animations --- */
+.animate-slide-up-out {
+  animation: iphone-slide-out 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-slide-up-in {
+  animation: iphone-slide-in 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes iphone-slide-out {
+  0% {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: translateY(-120%) scale(0.85);
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
+@keyframes iphone-slide-in {
+  0% {
+    transform: translateY(120%) scale(0.85);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  100% {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
 }

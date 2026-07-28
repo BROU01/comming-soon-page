@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 const STORAGE_KEY = "escen_launch_date";
 const DURATION_MS = 60 * 24 * 60 * 60 * 1000; // 60 jours ≈ 2 mois
 const TICK_MS = 1_000;
-const LIVE_ANNOUNCE_INTERVAL = 60; // annonce ARIA toutes les 60s
+const LIVE_ANNOUNCE_INTERVAL = 60;
 
 /* ============================================================
    Types
@@ -35,7 +35,76 @@ function pad(n: number): string {
 }
 
 /* ============================================================
-   Component
+   FlipDigitSlot — iPhone / iOS Calendar Slide-Up Digit Slot
+   ============================================================ */
+function FlipDigitSlot({ digit }: { digit: string }) {
+  const prevDigitRef = useRef(digit);
+  const [animating, setAnimating] = useState(false);
+  const [prevDigit, setPrevDigit] = useState(digit);
+
+  useEffect(() => {
+    if (prevDigitRef.current !== digit) {
+      setPrevDigit(prevDigitRef.current);
+      prevDigitRef.current = digit;
+      setAnimating(true);
+
+      const timer = setTimeout(() => {
+        setAnimating(false);
+      }, 650);
+
+      return () => clearTimeout(timer);
+    }
+  }, [digit]);
+
+  return (
+    <div className="digit-slot">
+      {animating && (
+        <div key={`prev-${prevDigit}`} className="number animate-slide-up-out">
+          {prevDigit}
+        </div>
+      )}
+      <div
+        key={`curr-${digit}-${animating}`}
+        className={`number ${animating ? "animate-slide-up-in" : ""}`}
+      >
+        {digit}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   TimerCard — Card per unit with white background & cyan text
+   ============================================================ */
+function TimerCard({
+  value,
+  label,
+  id,
+}: {
+  value: number;
+  label: string;
+  id: string;
+}) {
+  const time = pad(value);
+
+  return (
+    <div
+      className="bg-white border border-escen-border rounded-xl md:rounded-2xl shadow-[0_10px_30px_rgba(29,43,107,0.08)] p-4 sm:p-5 flex flex-col items-center justify-center gap-2 min-w-0 transition-transform duration-300 hover:scale-[1.02]"
+      data-testid={id}
+    >
+      <div className="flex gap-0.5 sm:gap-1 overflow-hidden py-0.5">
+        <FlipDigitSlot digit={time[0]} />
+        <FlipDigitSlot digit={time[1]} />
+      </div>
+      <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-escen-navy">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+/* ============================================================
+   Main Component: CountdownTimer
    ============================================================ */
 export default function CountdownTimer() {
   const [targetTime, setTargetTime] = useState<number | null>(null);
@@ -44,7 +113,7 @@ export default function CountdownTimer() {
   const tickCount = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /* --- Établir ou lire la date cible --- */
+  /* --- Read or set launch date --- */
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -58,12 +127,11 @@ export default function CountdownTimer() {
         setTargetTime(target);
       }
     } catch {
-      // localStorage indisponible (mode privé) → date de session
       setTargetTime(Date.now() + DURATION_MS);
     }
   }, []);
 
-  /* --- Tick --- */
+  /* --- Tick function --- */
   const tick = useCallback(() => {
     if (!targetTime) return;
 
@@ -82,7 +150,7 @@ export default function CountdownTimer() {
     tickCount.current++;
   }, [targetTime]);
 
-  /* --- Démarrer / arrêter l'interval --- */
+  /* --- Start/stop timer interval --- */
   useEffect(() => {
     if (!targetTime) return;
 
@@ -97,7 +165,7 @@ export default function CountdownTimer() {
     };
   }, [targetTime, tick]);
 
-  /* --- Pause quand l'onglet est caché --- */
+  /* --- Pause when tab is hidden --- */
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -117,25 +185,23 @@ export default function CountdownTimer() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [targetTime, tick]);
 
-  /* --- États vides (SSR / chargement) --- */
+  /* --- Loading / SSR State --- */
   if (!targetTime || (!isLaunched && !segments)) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full max-w-[640px]" role="group" aria-label="Compte à rebours">
-        {["Jours", "Heures", "Minutes", "Secondes"].map((label) => (
-          <div key={label} className="bg-white border border-escen-border rounded-xl shadow-[0_10px_30px_rgba(29,43,107,0.08)] p-5 md:p-6 flex flex-col items-center gap-2">
-            <span className="text-3xl md:text-5xl lg:text-6xl font-bold text-escen-cyan tabular-nums leading-none">
-              --
-            </span>
-            <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-escen-navy">
-              {label}
-            </span>
-          </div>
-        ))}
+      <div
+        className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full max-w-[640px]"
+        role="group"
+        aria-label="Compte à rebours"
+      >
+        <TimerCard value={0} label="Jours" id="countdown-days" />
+        <TimerCard value={0} label="Heures" id="countdown-hours" />
+        <TimerCard value={0} label="Minutes" id="countdown-minutes" />
+        <TimerCard value={0} label="Secondes" id="countdown-seconds" />
       </div>
     );
   }
 
-  /* --- État lancé --- */
+  /* --- Launched State --- */
   if (isLaunched) {
     return (
       <div
@@ -149,7 +215,7 @@ export default function CountdownTimer() {
     );
   }
 
-  /* --- Timer actif --- */
+  /* --- Active Timer State --- */
   const needsAnnounce = tickCount.current % LIVE_ANNOUNCE_INTERVAL === 0;
 
   return (
@@ -159,73 +225,17 @@ export default function CountdownTimer() {
         role="group"
         aria-label="Compte à rebours avant la mise en ligne"
       >
-        {/* Jours */}
-        <TimerCard
-          value={segments!.days}
-          label="Jours"
-          id="countdown-days"
-        />
-        {/* Heures */}
-        <TimerCard
-          value={segments!.hours}
-          label="Heures"
-          id="countdown-hours"
-        />
-        {/* Minutes */}
-        <TimerCard
-          value={segments!.minutes}
-          label="Minutes"
-          id="countdown-minutes"
-        />
-        {/* Secondes */}
-        <TimerCard
-          value={segments!.seconds}
-          label="Secondes"
-          id="countdown-seconds"
-        />
+        <TimerCard value={segments!.days} label="Jours" id="countdown-days" />
+        <TimerCard value={segments!.hours} label="Heures" id="countdown-hours" />
+        <TimerCard value={segments!.minutes} label="Minutes" id="countdown-minutes" />
+        <TimerCard value={segments!.seconds} label="Secondes" id="countdown-seconds" />
       </div>
 
-      {/* Annonce ARIA — discrète, une fois par minute */}
-      <p
-        className="sr-only"
-        aria-live="polite"
-        aria-atomic="true"
-        role="status"
-      >
+      <p className="sr-only" aria-live="polite" aria-atomic="true" role="status">
         {needsAnnounce
           ? `Il reste ${segments!.days} jours, ${segments!.hours} heures et ${segments!.minutes} minutes.`
           : ""}
       </p>
-    </div>
-  );
-}
-
-/* ============================================================
-   TimerCard — sous-composant
-   ============================================================ */
-function TimerCard({
-  value,
-  label,
-  id,
-}: {
-  value: number;
-  label: string;
-  id: string;
-}) {
-  return (
-    <div
-      className="bg-white border border-escen-border rounded-xl shadow-[0_10px_30px_rgba(29,43,107,0.08)] p-5 md:p-6 flex flex-col items-center gap-2 min-w-0"
-      data-testid={id}
-    >
-      <span
-        className="text-[clamp(2.5rem,6vw,4rem)] font-bold text-escen-cyan tabular-nums leading-none transition-all duration-160"
-        key={value}
-      >
-        {pad(value)}
-      </span>
-      <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-escen-navy">
-        {label}
-      </span>
     </div>
   );
 }
