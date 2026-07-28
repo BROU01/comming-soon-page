@@ -35,9 +35,10 @@ function pad(n: number): string {
 }
 
 /* ============================================================
-   FlipDigitSlot — iPhone / iOS Calendar Slide-Up Digit Slot
+   FlipDigitSlot — Independent iPhone Slide-Up Digit Slot
+   Staggered delay: units (index 1) slide first, tens (index 0) follow
    ============================================================ */
-function FlipDigitSlot({ digit }: { digit: string }) {
+function FlipDigitSlot({ digit, index = 0 }: { digit: string; index?: number }) {
   const prevDigitRef = useRef(digit);
   const [animating, setAnimating] = useState(false);
   const [prevDigit, setPrevDigit] = useState(digit);
@@ -46,15 +47,24 @@ function FlipDigitSlot({ digit }: { digit: string }) {
     if (prevDigitRef.current !== digit) {
       setPrevDigit(prevDigitRef.current);
       prevDigitRef.current = digit;
-      setAnimating(true);
 
-      const timer = setTimeout(() => {
+      // Stagger animation: units digit (index 1) slides at 0ms, tens digit (index 0) slides 110ms later
+      const staggerDelay = index === 0 ? 110 : 0;
+
+      const delayTimer = setTimeout(() => {
+        setAnimating(true);
+      }, staggerDelay);
+
+      const clearTimer = setTimeout(() => {
         setAnimating(false);
-      }, 650);
+      }, staggerDelay + 650);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(delayTimer);
+        clearTimeout(clearTimer);
+      };
     }
-  }, [digit]);
+  }, [digit, index]);
 
   return (
     <div className="digit-slot">
@@ -74,7 +84,7 @@ function FlipDigitSlot({ digit }: { digit: string }) {
 }
 
 /* ============================================================
-   TimerCard — Card per unit with white background & cyan text
+   TimerCard — White surface card containing distinct digit slots
    ============================================================ */
 function TimerCard({
   value,
@@ -89,14 +99,14 @@ function TimerCard({
 
   return (
     <div
-      className="bg-white border border-escen-border rounded-xl md:rounded-2xl shadow-[0_10px_30px_rgba(29,43,107,0.08)] p-4 sm:p-5 flex flex-col items-center justify-center gap-2 min-w-0 transition-transform duration-300 hover:scale-[1.02]"
+      className="bg-white border border-escen-border rounded-xl md:rounded-2xl shadow-[0_10px_30px_rgba(29,43,107,0.08)] p-4 sm:p-5 flex flex-col items-center justify-center gap-3 min-w-0 transition-transform duration-300 hover:scale-[1.02]"
       data-testid={id}
     >
-      <div className="flex gap-0.5 sm:gap-1 overflow-hidden py-0.5">
-        <FlipDigitSlot digit={time[0]} />
-        <FlipDigitSlot digit={time[1]} />
+      <div className="flex gap-1.5 sm:gap-2 items-center justify-center">
+        <FlipDigitSlot digit={time[0]} index={0} />
+        <FlipDigitSlot digit={time[1]} index={1} />
       </div>
-      <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-escen-navy">
+      <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-escen-navy">
         {label}
       </span>
     </div>
