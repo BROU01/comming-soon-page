@@ -3,26 +3,11 @@
 import { useEffect, useRef } from "react";
 
 /* ============================================================
-   SocialProof
-
-   Deep cognitive brainstorming + mind marketing :
-   Cette accroche est conçue pour activer les déclencheurs
-   psychologiques de rétention humaine :
-
-   1. SÉCURITÉ IDENTITAIRE → "votre parcours", "votre ambition"
-      → Le lecteur se sent personnellement concerné
-   2. RECONNAISSANCE → "histoires vraies", "reconnue"
-      → Besoin fondamental d'être vu et validé
-   3. HÉRITAGE → "chaque diplôme raconte l'histoire"
-      → Valeur durable, pas un simple document
-   4. CONFIANCE → "confiance", "authenticité"
-      → Fondation de la relation institution-étudiant-employeur
-   5. APPARTENANCE → "mérite"
-      → Justice et équité dans la reconnaissance
+   SocialProof — Deep Cognitive & Mastermind Marketing Hook
    ============================================================ */
 
 export default function SocialProof() {
-  const ref = useRef<HTMLParagraphElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -46,19 +31,25 @@ export default function SocialProof() {
   }, []);
 
   return (
-    <p
+    <div
       ref={ref}
-      className="max-w-[580px] mx-auto text-base md:text-lg leading-relaxed md:leading-[1.7] text-escen-text-secondary text-center transition-all duration-700 ease-out opacity-0 translate-y-3"
+      className="max-w-[640px] mx-auto text-center transition-all duration-700 ease-out opacity-0 translate-y-3 px-4 py-2"
     >
-      <span className="block mb-3 text-escen-navy font-semibold text-sm uppercase tracking-[0.15em]">
-        — Une solution pensée pour l&apos;humain —
-      </span>
-      <span className="block">
-        Chaque diplôme raconte l&apos;histoire d&apos;un parcours, d&apos;une ambition,
-        d&apos;une vie qui se construit. Notre future solution de vérification
-        garantit que chaque réussite soit reconnue avec l&apos;authenticité
-        et la confiance qu&apos;elle mérite.
-      </span>
-    </p>
+      {/* Badge d'ancrage psychologique */}
+      <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-escen-cyan-50 border border-escen-cyan-100 text-escen-navy text-[0.75rem] font-semibold tracking-widest uppercase">
+        <span className="w-2 h-2 rounded-full bg-escen-cyan animate-pulse" />
+        La confiance de demain se bâtit aujourd&apos;hui
+      </div>
+
+      {/* Accroche cognitive à fort impact humain */}
+      <p className="text-lg md:text-2xl font-semibold text-escen-navy leading-snug md:leading-relaxed mb-3 tracking-tight">
+        &ldquo;Les plus grandes réussites reposent sur une preuve irréfutable. Nous protégeons votre mérite pour captiver les recruteurs et propulser votre avenir.&rdquo;
+      </p>
+
+      {/* Rétention et réassurance marketing */}
+      <p className="text-xs sm:text-sm text-escen-text-secondary leading-relaxed max-w-[540px] mx-auto font-normal">
+        Une technologie d&apos;authentification de nouvelle génération qui scelle la valeur de votre parcours auprès des leaders et institutions de demain.
+      </p>
+    </div>
   );
 }
