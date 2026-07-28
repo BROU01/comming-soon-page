@@ -35,7 +35,7 @@ function pad(n: number): string {
 }
 
 /* ============================================================
-   FlipDigitSlot — Independent iPhone Slide-Up Digit Slot
+   FlipDigitSlot - Independent iPhone Slide-Up Digit Slot
    Staggered delay: units (index 1) slide first, tens (index 0) follow
    ============================================================ */
 function FlipDigitSlot({ digit, index = 0 }: { digit: string; index?: number }) {
@@ -84,7 +84,7 @@ function FlipDigitSlot({ digit, index = 0 }: { digit: string; index?: number }) 
 }
 
 /* ============================================================
-   TimerCard — White surface card containing distinct digit slots
+   TimerCard - White surface card containing distinct digit slots
    ============================================================ */
 function TimerCard({
   value,
@@ -99,7 +99,7 @@ function TimerCard({
 
   return (
     <div
-      className="bg-white border border-escen-border rounded-xl md:rounded-2xl shadow-[0_10px_30px_rgba(29,43,107,0.08)] p-4 sm:p-5 flex flex-col items-center justify-center gap-3 min-w-0 transition-transform duration-300 hover:scale-[1.02]"
+      className="bg-white border border-escen-border rounded-xl md:rounded-2xl shadow-[0_10px_30px_rgba(29,43,107,0.08)] p-3 sm:p-4 flex flex-col items-center justify-center gap-2 min-w-0 transition-transform duration-300 hover:scale-[1.02]"
       data-testid={id}
     >
       <div className="flex gap-1.5 sm:gap-2 items-center justify-center">

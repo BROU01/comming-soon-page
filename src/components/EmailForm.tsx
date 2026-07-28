@@ -79,7 +79,7 @@ export default function EmailForm() {
             onChange={handleInputChange}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder="votre@email.fr"
+            placeholder="votre@gmail.com"
             required
             autoComplete="email"
             disabled={isSubmitting}

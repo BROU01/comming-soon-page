@@ -1,4 +1,4 @@
-# ESCEN — Coming Soon
+# ESCEN - Coming Soon
 
 Page d'annonce pour la nouvelle solution numérique de vérification sécurisée de diplômes **ESCEN**.
 

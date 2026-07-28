@@ -1,26 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
 /* ============================================================
-   Inter — variable font loaded from Google Fonts via next/font
-   ============================================================ */
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-  preload: true,
-  fallback: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
-});
-
-/* ============================================================
-   Metadata — SEO, Open Graph, Twitter Cards, Icons
+   Metadata - SEO, Open Graph, Twitter Cards, Icons
    ============================================================ */
 const siteUrl = "https://escen.university";
 const siteName = "ESCEN";
 const description =
-  "ESCEN prépare le lancement de sa nouvelle solution numérique de vérification sécurisée de diplômes. Une plateforme académique moderne, transparente et digne de confiance.";
-const title = "ESCEN — Nouvelle solution numérique à venir";
+  "ESCEN prépare le lancement de sa nouvelle solution numérique de vérification sécurisée de diplômes et relevés de notes. Une plateforme académique moderne, transparente et digne de confiance.";
+const title = "ESCEN - Vérification des diplômes et relevés en un clic";
 
 export const metadata: Metadata = {
   title: {
@@ -44,29 +32,29 @@ export const metadata: Metadata = {
     "éducation",
     "enseignement supérieur",
   ],    /* --- Open Graph --- */
-    openGraph: {
-      type: "website",
-      locale: "fr_FR",
-      siteName: siteName,
-      title: title,
-      description: description,
-      url: siteUrl,
-      // TODO: Remplacer par une vraie image PNG 1200x630 au lancement
-    },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: siteName,
+    title: title,
+    description: description,
+    url: siteUrl,
+    // TODO: Remplacer par une vraie image PNG 1200x630 au lancement
+  },
 
-    /* --- Twitter Card --- */
-    twitter: {
-      card: "summary",
-      title: title,
-      description: description,
-    },
+  /* --- Twitter Card --- */
+  twitter: {
+    card: "summary",
+    title: title,
+    description: description,
+  },
 
   /* --- Icons --- */
   icons: {
     icon: [
-      { url: "/LOGO_ESCEN_WEB.png", sizes: "any" },
+      { url: "/ESECN LOGO (1).png", sizes: "any" },
     ],
-    shortcut: "/LOGO_ESCEN_WEB.png",
+    shortcut: "/ESECN LOGO (1).png",
   },
 
   /* --- Theme --- */
@@ -122,7 +110,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${inter.variable} h-full antialiased`}>
+    <html lang="fr" className="h-full antialiased">
       <head>
         {/* Preconnect to Google Fonts (fallback if next/font needs it) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -134,10 +122,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        {/* CSP Meta (relaxed for Google Fonts + inline styles) */}
+        {/* CSP Meta (relaxed for Google Fonts + inline styles + Dev mode unsafe-eval) */}
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none';"
+          content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; base-uri 'none'; form-action 'self'; frame-ancestors 'none';"
         />
       </head>
       <body className="min-h-dvh flex flex-col">

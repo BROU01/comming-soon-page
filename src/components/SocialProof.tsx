@@ -1,55 +1,61 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
-/* ============================================================
-   SocialProof — Deep Cognitive & Mastermind Marketing Hook
-   ============================================================ */
+const PROVERBS = [
+  {
+    text: "L'éducation est l'arme la plus puissante pour changer le monde.",
+    author: "Nelson Mandela"
+  },
+  {
+    text: "Le savoir est la seule richesse que l'on puisse diviser sans la diminuer.",
+    author: "Alfred Sauvy"
+  },
+  {
+    text: "Le futur appartient à ceux qui croient à la beauté de leurs rêves.",
+    author: "Eleanor Roosevelt"
+  },
+  {
+    text: "La confiance est le ciment de toute réussite.",
+    author: "Proverbe"
+  }
+];
 
 export default function SocialProof() {
-  const ref = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [fadeState, setFadeState] = useState<"in" | "out">("in");
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const interval = setInterval(() => {
+      setFadeState("out");
+      setTimeout(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % PROVERBS.length);
+        setFadeState("in");
+      }, 500); // 500ms fade out
+    }, 6000); // change every 6 seconds
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add("opacity-100", "translate-y-0");
-          el.classList.remove("opacity-0", "translate-y-3");
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    observer.observe(el);
-    return () => {
-      observer.disconnect();
-    };
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <div
-      ref={ref}
-      className="max-w-[640px] mx-auto text-center transition-all duration-700 ease-out opacity-0 translate-y-3 px-4 py-2"
-    >
-      {/* Badge d'ancrage psychologique */}
-      <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-escen-cyan-50 border border-escen-cyan-100 text-escen-navy text-[0.75rem] font-semibold tracking-widest uppercase">
-        <span className="w-2 h-2 rounded-full bg-escen-cyan animate-pulse" />
-        La confiance de demain se bâtit aujourd&apos;hui
+    <div className="w-full max-w-[800px] mx-auto pt-10 pb-4 mt-6 md:mt-10 min-h-[110px] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-2">
+        {/* Citation */}
+        <p
+          className={`text-base sm:text-lg md:text-xl font-medium italic text-escen-navy/80 leading-relaxed transition-all duration-500 ease-in-out ${fadeState === "in" ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]"
+            }`}
+        >
+          &ldquo;{PROVERBS[currentIndex].text}&rdquo;
+        </p>
+
+        {/* Auteur */}
+        <span
+          className={`text-xs font-bold uppercase tracking-widest text-escen-cyan transition-all duration-500 ease-in-out ${fadeState === "in" ? "opacity-80 translate-y-0" : "opacity-0 -translate-y-1"
+            }`}
+        >
+          {PROVERBS[currentIndex].author}
+        </span>
       </div>
-
-      {/* Accroche cognitive à fort impact humain */}
-      <p className="text-lg md:text-2xl font-semibold text-escen-navy leading-snug md:leading-relaxed mb-3 tracking-tight">
-        &ldquo;Les plus grandes réussites reposent sur une preuve irréfutable. Nous protégeons votre mérite pour captiver les recruteurs et propulser votre avenir.&rdquo;
-      </p>
-
-      {/* Rétention et réassurance marketing */}
-      <p className="text-xs sm:text-sm text-escen-text-secondary leading-relaxed max-w-[540px] mx-auto font-normal">
-        Une technologie d&apos;authentification de nouvelle génération qui scelle la valeur de votre parcours auprès des leaders et institutions de demain.
-      </p>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 {
   "name": "ESCEN",
   "short_name": "ESCEN",
-  "description": "ESCEN — Nouvelle solution numérique de vérification sécurisée de diplômes",
+  "description": "ESCEN - Nouvelle solution numérique de vérification sécurisée de diplômes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FAFBFC",
