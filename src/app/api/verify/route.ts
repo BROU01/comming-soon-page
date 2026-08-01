@@ -154,12 +154,16 @@ async function detectFraudAndAlert(
     const adminSupabase = await createAdminClient();
     const since = new Date(Date.now() - FRAUD_WINDOW_MS).toISOString();
 
-    // Compter les échecs sur cet identifiant dans la fenêtre
+    // Compter les échecs sur cet identifiant dans la fenêtre.
+    // NB: on exclut les échecs captcha_failed — un bot rejeté par le CAPTCHA
+    // ne doit pas faire gonfler le compteur de fraude (ce rôle revient au
+    // CAPTCHA lui-même), sinon une fausse alerte serait envoyée.
     const { count } = await adminSupabase
       .from("verifications")
       .select("id", { count: "exact", head: true })
       .eq("attempted_id", identifier)
       .eq("result", "failed")
+      .neq("error_type", "captcha_failed")
       .gte("timestamp", since);
 
     if (!count || count < FRAUD_THRESHOLD) return;
