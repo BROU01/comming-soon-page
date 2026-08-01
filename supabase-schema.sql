@@ -118,6 +118,23 @@ CREATE INDEX IF NOT EXISTS idx_rate_limits_ip ON rate_limits (ip_address, endpoi
 CREATE INDEX IF NOT EXISTS idx_rate_limits_blocked ON rate_limits (blocked_until)
   WHERE blocked_until IS NOT NULL;
 
+-- ─── Table : inscriptions au lancement (formulaire d'accueil) ──
+-- Collecte des emails pour notifier au lancement. Email unique
+-- (idempotent), insertion publique autorisée (RLS), lecture admin.
+-- NB : les policies RLS de cette table sont définies plus bas, dans la
+-- section RLS, APRÈS la fonction is_admin() qu'elles référencent
+-- (CREATE POLICY résout les fonctions à la création : sur base neuve,
+-- un ordre inversé ferait échouer le script).
+CREATE TABLE IF NOT EXISTS notify_subscribers (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email      TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notify_subscribers_created_at ON notify_subscribers (created_at DESC);
+
+ALTER TABLE notify_subscribers ENABLE ROW LEVEL SECURITY;
+
 -- ─── Table : rôles administrateurs ───────────────────────────
 -- Référence qui utilisateur Supabase a quel rôle.
 -- Uniquement accessible via is_admin() (SECURITY DEFINER) ou la clé service role.
@@ -237,6 +254,19 @@ CREATE POLICY "admin_logs_insert_admin" ON admin_logs
 
 -- admin_roles : AUCUNE policy publique — accessible uniquement via
 -- la fonction is_admin() (SECURITY DEFINER) ou la clé service role.
+
+-- RLS : notify_subscribers — insertion publique (le formulaire d'accueil
+-- utilise la clé anon), lecture réservée aux admins. Définies ici, APRÈS
+-- is_admin() (résolue à la création de la policy).
+DROP POLICY IF EXISTS "notify_subscribers_insert_public" ON notify_subscribers;
+CREATE POLICY "notify_subscribers_insert_public" ON notify_subscribers
+  FOR INSERT
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "notify_subscribers_select_admin" ON notify_subscribers;
+CREATE POLICY "notify_subscribers_select_admin" ON notify_subscribers
+  FOR SELECT
+  USING (public.is_admin());
 
 -- ─── Nettoyage automatique (cron Supabase) ────────────────────
 -- Décision actée : l'historique des vérifications est conservé 5 ans

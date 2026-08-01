@@ -2,9 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
- * Crée un client Supabase pour le middleware Next.js.
+ * Crée un client Supabase pour le proxy Next.js.
+ * NB : convention `proxy` (Next.js 16) — `middleware` est déprécié.
  */
-export function createMiddlewareClient(request: NextRequest) {
+export function createProxyClient(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

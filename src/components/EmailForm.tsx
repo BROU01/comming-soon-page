@@ -27,7 +27,7 @@ export default function EmailForm() {
     }
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const trimmed = email.trim();
@@ -44,15 +44,36 @@ export default function EmailForm() {
 
     setIsSubmitting(true);
 
-    // TODO: Remplacer par un appel API réel (ex: /api/notify)
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.success) {
+        setFeedback({
+          type: "error",
+          message: data.error || "Une erreur est survenue. Réessayez.",
+        });
+        return;
+      }
+
       setFeedback({
         type: "success",
         message: "Merci ! Nous vous tiendrons informé du lancement.",
       });
       setEmail("");
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Une erreur est survenue. Réessayez.",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 400);
+    }
   }
 
   return (

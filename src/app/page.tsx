@@ -1,5 +1,6 @@
 import Image from "next/image";
 import CountdownTimer from "@/components/CountdownTimer";
+import EmailForm from "@/components/EmailForm";
 import SocialProof from "@/components/SocialProof";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -73,6 +74,9 @@ export default function Home() {
 
           {/* Proverbe en rotation automatique */}
           <SocialProof />
+
+          {/* Formulaire de notification au lancement */}
+          <EmailForm />
         </section>
 
         {/* ============================================

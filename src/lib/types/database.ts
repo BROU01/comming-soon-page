@@ -84,6 +84,13 @@ export type FraudAlert = {
   alerted_at: string;
 };
 
+// ─── Inscription au lancement (formulaire d'accueil) ─────────
+export type NotifySubscriber = {
+  id: string;
+  email: string;
+  created_at: string;
+};
+
 // ─── Supabase Database type ──────────────────────────────────
 export interface Database {
   public: {
@@ -122,6 +129,12 @@ export interface Database {
         Row: FraudAlert;
         Insert: Omit<FraudAlert, "id" | "alerted_at">;
         Update: Partial<Omit<FraudAlert, "id">>;
+        Relationships: [];
+      };
+      notify_subscribers: {
+        Row: NotifySubscriber;
+        Insert: Omit<NotifySubscriber, "id" | "created_at">;
+        Update: Partial<Omit<NotifySubscriber, "id">>;
         Relationships: [];
       };
     };
