@@ -1,5 +1,6 @@
 # 📋 Suivi du projet — ESCEN · Vérification sécurisée des relevés
 
+> **Dernière mise à jour : 01/08/2026**
 > Ce fichier est la **source de vérité** de l'avancement. Il est mis à jour à chaque fin de session.
 > Légende : ✅ Fait · 🔄 En cours · ⏳ À faire · 🚫 Bloqué
 
