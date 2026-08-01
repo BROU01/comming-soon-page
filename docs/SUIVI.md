@@ -31,7 +31,7 @@
 |---|---|---|
 | Enregistrement de chaque vérification (date, heure, résultat) | ✅ | Table `verifications` + colonne `attempted_id` |
 | Historique consultable par la scolarité / DSI uniquement | ✅ | RLS + espace admin |
-| Alerte email en cas de comportement anormal | ✅ | Resend : ≥ 5 échecs sur un même identifiant en 15 min → alerte (cooldown 24 h) |
+| Alerte email en cas de comportement anormal | ✅ | Resend : ≥ 5 échecs sur un même identifiant en 15 min → alerte (cooldown 24 h) — **testé le 01/08/2026 : email délivré** (`delivered`), sujet « ⚠️ [ESCEN] Alerte sécurité » |
 | Export de l'historique (audit) | ✅ | API `/api/admin/verifications/export` |
 | Purge RGPD après 5 ans | ✅ | **Cron pg_cron** `purge-verifications-5y` (hebdo, lundi 03:00) + cleanup `rate_limits` 24 h — idempotent, actif si pg_cron dispo |
 
@@ -63,7 +63,7 @@
 | Test de bout en bout (création → QR → vérif → alerte) | ✅ | API validée : ID valide → succès, ID invalide/court/annulé → `not_found` générique |
 | Build de production | ✅ | `npm run build` OK (toutes routes compilées) |
 | Déploiement Vercel + domaine `verif.escen-university.fr` | ⏳ | Domaine décidé, réservation à confirmer |
-| Vérification domaine Resend (`alerts@escen-university.fr`) | ⏳ | En production uniquement (dev : `onboarding@resend.dev`) |
+| Vérification domaine Resend (`alerts@escen-university.fr`) | ⏳ | En production uniquement (dev : `onboarding@resend.dev` ne livre qu'à l'adresse du compte — **testé**) |
 | Récupération automatique des relevés (API scolarité) | ⏳ | Nécessite un échange avec l'équipe scolarité |
 | API `/api/notify` (formulaire email de l'accueil) | ⏳ | TODO existant |
 | Mise à jour du `README.md` | ⏳ | Décrit encore uniquement la page coming-soon |
@@ -92,7 +92,7 @@
 ## 🚀 Prochaine action (recommandée)
 
 1. **Obtenir les clés Cloudflare Turnstile** (dash.cloudflare.com → Turnstile) et les mettre dans `.env.local` → active le CAPTCHA
-2. Déclencher l'alerte anti-fraude : 5 échecs sur un même ID → vérifier l'email Resend (mettre `RESEND_ALERT_TO` à l'adresse du compte Resend en dev)
+2. ~~Déclencher l'alerte anti-fraude~~ ✅ **Fait le 01/08/2026** (email délivré) — en prod : remettre `RESEND_ALERT_TO` sur la scolarité/DSI + vérifier le domaine Resend
 3. Déployer sur Vercel + domaine `verif.escen-university.fr`
 
 ---
