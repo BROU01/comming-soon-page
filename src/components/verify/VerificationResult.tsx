@@ -73,6 +73,21 @@ export default function VerificationResult({ result, locale, onReset }: Verifica
     );
   }
 
+  // ── CAPTCHA refusé ───────────────────────────────────────
+  if (result.error?.code === "captcha_failed") {
+    return (
+      <ErrorCard
+        icon="🤖"
+        title={isFrench ? "Vérification anti-robot" : "Bot check"}
+        message={isFrench
+          ? "La vérification anti-robot a échoué. Veuillez réessayer."
+          : "The bot check failed. Please try again."}
+        onReset={onReset}
+        locale={locale}
+      />
+    );
+  }
+
   // ── Erreur serveur ───────────────────────────────────────
   return (
     <ErrorCard

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { sendFraudAlert } from "@/lib/resend";
+import { isTurnstileEnabled, verifyTurnstileToken } from "@/lib/turnstile";
 import crypto from "crypto";
 
 // ─── Configuration rate limiting ─────────────────────────────
@@ -206,13 +207,41 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    // ── Rate limiting ──────────────────────────────────────
+    // ── CAPTCHA anti-robot (Turnstile) ─────────────────────
+    // Désactivé en dev (pas de clés) ; en prod, un jeton valide est requis
+    // AVANT le rate limiting : les robots rejetés ne consomment pas de quota.
+    const body = await request.json().catch(() => ({}));
+    const { id, turnstileToken } = body as { id?: string; turnstileToken?: string };
+
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       request.headers.get("x-real-ip") ??
       "unknown";
     const ipHash = hashIP(ip);
 
+    if (isTurnstileEnabled()) {
+      const captchaOk = await verifyTurnstileToken(turnstileToken, ip);
+
+      if (!captchaOk) {
+        await logVerification(supabase, {
+          releve_id: null,
+          attempted_id: typeof id === "string" ? id : "",
+          ip_address: ipHash,
+          user_agent: request.headers.get("user-agent") ?? "",
+          result: "failed",
+          error_type: "captcha_failed",
+        });
+
+        await delay(Math.max(0, 200 - (Date.now() - startTime)));
+
+        return NextResponse.json(
+          { success: false, error: { code: "captcha_failed", message: "" } },
+          { status: 400 }
+        );
+      }
+    }
+
+    // ── Rate limiting ──────────────────────────────────────
     const { allowed } = await checkRateLimit(supabase, ipHash);
     if (!allowed) {
       await logVerification(supabase, {
@@ -231,10 +260,6 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-
-    // ── Valider l'ID ───────────────────────────────────────
-    const body = await request.json().catch(() => ({}));
-    const { id } = body as { id?: string };
 
     if (!id || typeof id !== "string" || id.length < 8) {
       await logVerification(supabase, {

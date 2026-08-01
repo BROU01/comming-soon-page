@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import TurnstileWidget from "@/components/verify/TurnstileWidget";
 import type { VerifyResponse } from "@/lib/types/database";
 import type { Locale } from "@/lib/types/database";
 
@@ -10,6 +11,9 @@ interface VerifyFormProps {
   onResult: (result: VerifyResponse) => void;
 }
 
+// Clé publique Turnstile (sûre côté client). Vide en dev → CAPTCHA désactivé.
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
 /**
  * Formulaire de vérification d'un identifiant de relevé.
  * Utilisé sur la page /verify et /verify/[id] (pré-rempli).
@@ -18,6 +22,7 @@ export default function VerifyForm({ locale, initialId = "", onResult }: VerifyF
   const [id, setId] = useState(initialId);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const isFrench = locale === "fr";
 
@@ -32,6 +37,14 @@ export default function VerifyForm({ locale, initialId = "", onResult }: VerifyF
       return;
     }
 
+    // CAPTCHA activé mais jeton absent/expiré → bloquer
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setError(isFrench
+        ? "Veuillez compléter la vérification anti-robot."
+        : "Please complete the bot check.");
+      return;
+    }
+
     setError(null);
     setIsVerifying(true);
 
@@ -39,11 +52,17 @@ export default function VerifyForm({ locale, initialId = "", onResult }: VerifyF
       const res = await fetch("/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: trimmed }),
+        body: JSON.stringify({ id: trimmed, turnstileToken: turnstileToken ?? undefined }),
       });
 
       const data: VerifyResponse = await res.json();
       onResult(data);
+
+      // Jeton mono-usage : invalider après chaque tentative.
+      // NB: le message d'erreur (ex: captcha_failed) est affiché par
+      // VerificationResult — ne pas setError ici (le formulaire est démonté
+      // par onResult).
+      setTurnstileToken(null);
     } catch {
       setError(isFrench
         ? "Erreur de connexion. Veuillez réessayer."
@@ -102,6 +121,14 @@ export default function VerifyForm({ locale, initialId = "", onResult }: VerifyF
         <p id="verify-error" role="alert" className="mt-2 text-sm font-medium text-red-500">
           {error}
         </p>
+      )}
+
+      {TURNSTILE_SITE_KEY && (
+        <TurnstileWidget
+          siteKey={TURNSTILE_SITE_KEY}
+          onToken={setTurnstileToken}
+          locale={locale}
+        />
       )}
     </form>
   );

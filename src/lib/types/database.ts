@@ -147,7 +147,7 @@ export interface VerifyResponse {
   error?: {
     // NB: un relevé annulé renvoie "not_found" (anti-fraude : indistinguable
     // d'un identifiant inconnu pour le public).
-    code: "not_found" | "rate_limited" | "server_error";
+    code: "not_found" | "rate_limited" | "server_error" | "captcha_failed";
     message: string;
   };
 }

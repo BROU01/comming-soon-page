@@ -40,6 +40,11 @@ CREATE TABLE IF NOT EXISTS releves (
   replaced_by   UUID DEFAULT NULL              -- si remplacé, lien vers le nouveau
 );
 
+-- Compatibilité : la table releves peut exister sans la colonne replaced_by
+-- (créée avant la fonctionnalité remplacement). Même pattern idempotent que
+-- attempted_id ci-dessous.
+ALTER TABLE releves ADD COLUMN IF NOT EXISTS replaced_by UUID DEFAULT NULL;
+
 -- Index pour recherche rapide
 CREATE INDEX IF NOT EXISTS idx_releves_student_name ON releves USING gin (to_tsvector('french', student_name));
 CREATE INDEX IF NOT EXISTS idx_releves_student_id ON releves (student_id);
@@ -57,6 +62,12 @@ CREATE TABLE IF NOT EXISTS verifications (
   error_type    TEXT DEFAULT '',               -- 'invalid_id', 'cancelled', 'rate_limited'
   timestamp     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Compatibilité : la table verifications peut exister sans la colonne
+-- attempted_id (créée avant la version anti-fraude). CREATE TABLE IF NOT
+-- EXISTS ne modifie pas une table existante → on ajoute la colonne en
+-- idempotent (ne fait rien si elle existe déjà).
+ALTER TABLE verifications ADD COLUMN IF NOT EXISTS attempted_id TEXT DEFAULT '';
 
 -- Index pour requêtes d'audit
 CREATE INDEX IF NOT EXISTS idx_verifications_releve_id ON verifications (releve_id);
@@ -151,6 +162,7 @@ ALTER TABLE releves ENABLE ROW LEVEL SECURITY;
 ALTER TABLE verifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fraud_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_roles ENABLE ROW LEVEL SECURITY;
 
 -- RLS : rate limiting — le client public doit pouvoir lire/écrire
@@ -226,7 +238,29 @@ CREATE POLICY "admin_logs_insert_admin" ON admin_logs
 -- admin_roles : AUCUNE policy publique — accessible uniquement via
 -- la fonction is_admin() (SECURITY DEFINER) ou la clé service role.
 
--- ─── Nettoyage automatique des rate_limits (toutes les heures) ──
--- Optionnel : créer un cron job Supabase pour nettoyer
--- SELECT cron.schedule('cleanup-rate-limits', '0 * * * *',
---   $$DELETE FROM rate_limits WHERE window_start < now() - interval '24 hours'$$);
+-- ─── Nettoyage automatique (cron Supabase) ────────────────────
+-- Décision actée : l'historique des vérifications est conservé 5 ans
+-- puis purgé automatiquement (conformité RGPD). Les rate_limits sont
+-- nettoyées après 24 h.
+--
+-- NB : nécessite l'extension pg_cron (Dashboard Supabase → Database →
+-- Extensions → pg_cron). Le DO block est idempotent et ne crée les jobs
+-- que si l'extension est disponible ; sans elle, rien ne casse.
+DO $cron$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    -- Purge RGPD : supprime les vérifications de plus de 5 ans (hebdo, lundi 03:00)
+    IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'purge-verifications-5y') THEN
+      PERFORM cron.unschedule('purge-verifications-5y');
+    END IF;
+    PERFORM cron.schedule('purge-verifications-5y', '0 3 * * 1',
+      $job$DELETE FROM verifications WHERE timestamp < now() - interval '5 years'$job$);
+
+    -- Nettoyage des rate_limits toutes les heures (24 h de données max)
+    IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cleanup-rate-limits') THEN
+      PERFORM cron.unschedule('cleanup-rate-limits');
+    END IF;
+    PERFORM cron.schedule('cleanup-rate-limits', '0 * * * *',
+      $job$DELETE FROM rate_limits WHERE window_start < now() - interval '24 hours'$job$);
+  END IF;
+END $cron$;
